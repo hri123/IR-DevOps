@@ -2,6 +2,10 @@ Host github.ibm.com
     identityfile ~/.ssh/id_rsa_github
     identitiesonly yes
     hostname github.ibm.com
+Host github.com
+    identityfile ~/.ssh/id_rsa_github
+    identitiesonly yes
+    hostname github.com
 Host *
     serveraliveinterval 240
 Host bm_block_test_4
