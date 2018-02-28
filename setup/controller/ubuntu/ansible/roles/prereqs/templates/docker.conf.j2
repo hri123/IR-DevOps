@@ -1,0 +1,10 @@
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -H fd:// --live-restore=true --iptables=false --log-opt max-size={{docker_log_max_size|default('100m')}} --log-opt max-file={{docker_log_max_file|default('3')}} {% if infra_docker_private_registry is defined and user_docker_private_registry is defined %}
+--insecure-registry {{infra_docker_private_registry}} --insecure-registry {{user_docker_private_registry}}
+{% elif user_docker_private_registry is defined %}
+--insecure-registry {{user_docker_private_registry}}
+{% elif infra_docker_private_registry is defined %}
+--insecure-registry {{infra_docker_private_registry}}
+{% else %}
+{% endif %}

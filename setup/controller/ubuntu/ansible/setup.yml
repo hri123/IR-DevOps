@@ -1,0 +1,8 @@
+
+---
+- name: Setup the controller
+  hosts: localhost
+  gather_facts: False
+
+  roles:
+    - { role: prereqs }

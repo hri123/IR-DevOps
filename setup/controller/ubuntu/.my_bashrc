@@ -1,0 +1,26 @@
+#
+# autojump
+[[ -s ~/.autojump/etc/profile.d/autojump.sh ]] && source ~/.autojump/etc/profile.d/autojump.sh
+#
+# preserve history across sessions - https://unix.stackexchange.com/questions/1288/preserve-bash-history-in-multiple-terminal-windows
+export HISTCONTROL=ignoredups:erasedups
+shopt -s histappend
+export PROMPT_COMMAND="history -a; history -c; history -r"
+#
+# Modify prompt Paul Dorwin style
+export PS1='
+$USER@$HOSTNAME - $(date +%y-%m-%d-%H.%M.%S.%N)
+=> $(pwd)
+-> '
+#
+# wdp-ams-devops
+scriptDir=~/git/wdp-ams-devops/Scripts
+# This will initialize the cluster abstraction
+if [ -f ${scriptDir}/wams-bash.rc ]; then source ${scriptDir}/wams-bash.rc; fi
+# This will update your PATH to include Scripts/dirs. This should be placed in wams-bash.rc
+alias initFunctions="source ${scriptDir}/_functions/initFunctions"
+if [ -f ${scriptDir}/_functions/initFunctions ]; then source ${scriptDir}/_functions/initFunctions; fi
+if [ -f ${scriptDir}/wams-alias.rc ]; then source ${scriptDir}/wams-alias.rc; fi
+#
+HISTSIZE=10000
+HISTFILESIZE=20000

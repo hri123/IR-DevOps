@@ -1,0 +1,13 @@
+---
+
+# placeholder for linux packages and versions
+packages:
+  vim:
+  ntp:
+  ufw:
+  jq:
+  nano:
+  emacs:
+
+# docker installation has multiple steps, so cannot be included as part of packages variable above
+docker_version: 1.13.1-0~ubuntu-xenial

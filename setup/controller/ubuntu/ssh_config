@@ -1,0 +1,46 @@
+Host github.ibm.com
+    identityfile ~/.ssh/id_rsa_github
+    identitiesonly yes
+    hostname github.ibm.com
+Host *
+    serveraliveinterval 240
+Host bm_block_test_4
+    identityfile "/root/.ssh/id_rsa_sl_machines"
+    hostname 169.47.74.74
+    user root
+    port 22
+Host bm_block_test_5
+    identityfile "/root/.ssh/id_rsa_sl_machines"
+    hostname 169.47.74.68
+    user root
+    port 22
+Host prasad-ansible-controller
+    identityfile "/root/.ssh/id_rsa_sl_machines"
+    hostname 9.30.147.86
+    user root
+    port 22
+Host jumpbox_laks
+    identityfile "/root/.ssh/id_rsa_sl_machines"
+    hostname 9.30.167.243
+    user hrikumar
+    port 22
+Host hrishi-hmc-sl
+    identityfile "/root/.ssh/id_rsa_sl_machines"
+    hostname 169.53.229.173
+    user root
+    port 22
+Host bowen_jumpbox_ubuntu_sso
+    identityfile "/root/.ssh/id_rsa_sl_machines"
+    hostname 169.46.135.201
+    user hrikumar
+    port 22
+Host bowen_jumpbox_centos_sso
+    identityfile "/root/.ssh/id_rsa_sl_machines"
+    hostname 169.47.198.100
+    user hrikumar
+    port 22
+Host ControllerC
+    identityfile "/root/.ssh/id_rsa_sl_machines"
+    hostname 9.30.249.197
+    user root
+    port 22

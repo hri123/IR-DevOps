@@ -1,0 +1,7 @@
+Host github.ibm.com
+ Hostname github.ibm.com
+ IdentityFile ~/.ssh/id_rsa_github
+ IdentitiesOnly yes
+Host *
+  ServerAliveInterval 240
+

@@ -1,0 +1,24 @@
+---
+
+- name: apt-get update
+  apt:
+    update_cache: yes
+#    cache_valid_time: "{{ apt_cache_valid_time }}"
+    cache_valid_time: 1800
+  register: agu_rslt
+
+- name: Get current kernel version
+  shell: uname -r
+  register: kernel_version
+
+# without force=yes, the particular version will not be installed when the package with any version already exists
+# this version will NOT be overwritten even if the apt module is invoked on the same package again, unless 'force=yes'
+- name: Install prereq Linux packages - specified versions
+  apt: name="{{ item.key }}{% if item.value is not none %}={{ item.value }}{% endif %}" state=present force=yes
+  with_dict: "{{ packages }}"
+  when: use_latest_linux_os_packages is undefined
+
+- name: Install prereq Linux packages - latest
+  apt: name="{{ item.key }}" state=latest force=yes
+  with_dict: "{{ packages }}"
+  when: use_latest_linux_os_packages is defined      

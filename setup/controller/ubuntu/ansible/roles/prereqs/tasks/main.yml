@@ -1,0 +1,155 @@
+---
+
+- debug: var=ansible_ssh_user
+- debug: var=ansible_user
+- debug: var=ansible_user_id
+
+- name: test whether systemd is available
+  shell: if systemctl list-units 'init*'; then echo 'systemd here'; fi
+  become: yes
+  changed_when: False
+  register: rslt
+
+- set_fact: is_systemd={{ 'systemd here' in rslt.stdout }}
+- set_fact: is_upstart={{ not is_systemd|bool }}
+
+- include: setup_repos.yml
+  when: use_private_mirrors is defined and use_private_mirrors
+
+# Tasks for setting up the installation prereqs
+- stat: path=/var/lib/apt/lists/lock
+  register: apt_lock
+
+- name: create apt lock file if it doesn't exist
+  become: yes
+  shell: "mkdir -p /var/lib/apt/lists && touch /var/lib/apt/lists/lock"
+  when: not apt_lock.stat.exists
+
+- name: apt-get update
+  apt:
+    update_cache: yes
+    cache_valid_time: "{{ apt_cache_valid_time }}"
+  register: agu_rslt
+
+- name: Get current kernel version
+  shell: uname -r
+  register: kernel_version
+
+# without force=yes, the particular version will not be installed when the package with any version already exists
+# this version will NOT be overwritten even if the apt module is invoked on the same package again, unless 'force=yes'
+- name: Install prereq Linux packages - specified versions
+  apt: name="{{ item.key }}{% if item.value is not none %}={{ item.value }}{% endif %}" state=present force=yes
+  with_dict: "{{ packages }}"
+  when: use_latest_linux_os_packages is undefined
+
+- name: Install prereq Linux packages - latest
+  apt: name="{{ item.key }}" state=latest force=yes
+  with_dict: "{{ packages }}"
+  when: use_latest_linux_os_packages is defined      
+
+- name: Install libsystemd-journal0 on creaky old operating systems
+  apt: name=libsystemd-journal0 state=present
+  when: "ansible_distribution_release == 'trusty'"
+
+- name: ensure /opt/bin exists
+  file:
+    dest: /opt/bin
+    state: directory
+
+- name: Add docker apt keys
+  apt_key: keyserver=hkp://ha.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D
+  register: main_keyserver
+  when: use_private_mirrors is not defined or not use_private_mirrors
+  ignore_errors: True
+
+- name: Add docker apt keys (first mirror)
+  apt_key: keyserver=hkp://pgp.mit.edu:80 id=58118E89F3A912897C070ADBF76221572C52609D
+  register: mirror_keyserver
+  when: main_keyserver|failed and (use_private_mirrors is not defined or not use_private_mirrors)
+  ignore_errors: True
+
+- name: Add docker apt keys (second mirror)
+  apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=58118E89F3A912897C070ADBF76221572C52609D
+  when: mirror_keyserver|failed and (use_private_mirrors is not defined or not use_private_mirrors)
+
+- name: Update apt
+  apt_repository: repo='deb https://apt.dockerproject.org/repo ubuntu-{{ ansible_distribution_release }} main' state=present
+  when: use_private_mirrors is not defined or not use_private_mirrors
+
+- name: Install Docker
+  apt: pkg={{docker_package}}{% if docker_version is defined %}={{ docker_version }}{% endif %} update_cache=yes state=present
+  register: docker_installed
+  when: docker_community
+
+- name: add the ssh user to the docker group
+  user: name={{ansible_user_id}} groups=docker append=yes
+
+- name: Set max container log size
+  lineinfile: dest=/etc/default/docker
+              regexp='^DOCKER_OPTS="\$DOCKER_OPTS --log-opt max-size'
+              insertafter=EOF
+              line='DOCKER_OPTS=\"$DOCKER_OPTS --log-opt max-size={{docker_log_max_size|default('100m')}} --log-opt max-file={{docker_log_max_file|default('3')}}"'
+  when: is_upstart|bool
+
+# Allow insecure infrastrucure registry for the env.
+- name: ensure DOCKER_OPTS set in /etc/default/docker
+  lineinfile: dest=/etc/default/docker
+              regexp='^DOCKER_OPTS="\$DOCKER_OPTS --insecure'
+              insertafter=EOF
+              line='DOCKER_OPTS=\"$DOCKER_OPTS{% if infra_docker_private_registry is defined and user_docker_private_registry is defined %}
+                --insecure-registry {{infra_docker_private_registry}} --insecure-registry {{user_docker_private_registry}}
+              {% elif user_docker_private_registry is defined %}
+                --insecure-registry {{user_docker_private_registry}}
+              {% elif infra_docker_private_registry is defined %}
+                --insecure-registry {{infra_docker_private_registry}}
+              {% endif %}"'
+  when: is_upstart|bool and (infra_docker_private_registry or user_docker_private_registry is defined)
+  register: docker_configured
+
+- name: create docker drop-in service directory
+  file: path=/etc/systemd/system/docker.service.d state=directory mode=0755
+  when: is_systemd|bool
+
+- name: create docker drop-in service configuration
+  template: src=docker.conf.j2 dest=/etc/systemd/system/docker.service.d/docker.conf mode=0644
+  when: is_systemd|bool
+  register: docker_configured
+
+- name: reload systemd config
+  shell: systemctl daemon-reload
+  when: is_systemd|bool and docker_configured.changed
+
+- name: restart docker on config change
+  service: name=docker state=restarted
+  when: docker_configured.changed
+
+- name: ensure docker service is running
+  service: name=docker state=started
+
+- name: make sure required PyPi packages are installed
+  environment: "{{ env_vars|default({}) }}"
+  pip: name={{ item }} state=present
+  with_items:
+     - requests==2.12.1
+     - docker-py
+     - netaddr
+
+- name: Enable UFW. Allow everything
+  ufw: state=enabled policy=allow
+  when: perform_ufw_operations
+  ignore_errors: True
+
+- name: Enable UFW. Allow routed traffic
+  ufw: direction=routed policy=allow
+  when: perform_ufw_operations
+  ignore_errors: True
+
+- name: enable ufw logging
+  ufw: logging=on
+  when: perform_ufw_operations
+  ignore_errors: True
+
+- name: Permit SSH in
+  ufw: rule=allow to_port=22 proto=tcp interface={{the_network_interface}} direction=in
+  when: perform_ufw_operations
+  ignore_errors: True
