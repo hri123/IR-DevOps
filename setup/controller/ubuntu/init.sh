@@ -15,7 +15,7 @@ ssh -i ${SSH_PRIVATE_KEY} ${LOGIN_USER}@${TARGET_IP} 'touch ~/.ssh/config && cat
 ## To avoid: The authenticity of host 'github.ibm.com....
 ssh -i ${SSH_PRIVATE_KEY} ${LOGIN_USER}@${TARGET_IP} "ssh-keyscan github.ibm.com >> ~/.ssh/known_hosts"
 ## use double quotes instead of single quotes to evaluate the GIT_REPO env variable
-ssh -i ${SSH_PRIVATE_KEY} ${LOGIN_USER}@${TARGET_IP} "mkdir -p ~/git && cd ~/git && git clone ${GIT_REPO}"
+ssh -i ${SSH_PRIVATE_KEY} ${LOGIN_USER}@${TARGET_IP} "mkdir -p ~/git/github-hri123 && cd ~/git/github-hri123 && git clone ${GIT_REPO}"
 #
 # Install ansible and other tools (https://github.com/ggreer/the_silver_searcher)
 ssh -i ${SSH_PRIVATE_KEY} ${LOGIN_USER}@${TARGET_IP} 'apt-get update && apt-get install -y ca-certificates python2.7 curl make silversearcher-ag'

@@ -1,5 +1,5 @@
-Host github.ibm.com
- Hostname github.ibm.com
+Host github.com
+ Hostname github.com
  IdentityFile ~/.ssh/id_rsa_github
  IdentitiesOnly yes
 Host *

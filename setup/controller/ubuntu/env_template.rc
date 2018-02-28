@@ -4,5 +4,5 @@ export SSH_PRIVATE_KEY=/Users/hrishikesh/.ssh/id_rsa_sl_machines
 export SSH_PUBLIC_KEY=/Users/hrishikesh/.ssh/id_rsa_sl_machines.pub
 export LOGIN_USER=root
 export GITHUB_PRIVATE_KEY=/Users/hrishikesh/.ssh/id_rsa_github
-export GIT_REPO=git@github.ibm.com:hrishikesh-kumar/MyCode.git
+export GIT_REPO=git@github.com:hri123/IR-DevOps.git
 export NETWORK_INTERFACE=ens7
