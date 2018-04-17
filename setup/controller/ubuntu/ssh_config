@@ -28,11 +28,6 @@ Host jumpbox_laks
     hostname 9.30.167.243
     user hrikumar
     port 22
-Host hrishi-hmc-sl
-    identityfile "/root/.ssh/id_rsa_sl_machines"
-    hostname 169.53.229.173
-    user root
-    port 22
 Host bowen_jumpbox_ubuntu_sso
     identityfile "/root/.ssh/id_rsa_sl_machines"
     hostname 169.46.135.201
@@ -46,5 +41,10 @@ Host bowen_jumpbox_centos_sso
 Host ControllerC
     identityfile "/root/.ssh/id_rsa_sl_machines"
     hostname 9.30.249.197
+    user root
+    port 22
+Host hrishi_sl_controller
+    identityfile "/root/.ssh/id_rsa_sl_machines"
+    hostname 158.175.87.160
     user root
     port 22
