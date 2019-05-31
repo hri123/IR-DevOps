@@ -13,14 +13,31 @@ $USER@$HOSTNAME - $(date +%y-%m-%d-%H.%M.%S.%N)
 => $(pwd)
 -> '
 #
-# wdp-ams-devops
-scriptDir=~/git/wdp-ams-devops/Scripts
-# This will initialize the cluster abstraction
-if [ -f ${scriptDir}/wams-bash.rc ]; then source ${scriptDir}/wams-bash.rc; fi
-# This will update your PATH to include Scripts/dirs. This should be placed in wams-bash.rc
-alias initFunctions="source ${scriptDir}/_functions/initFunctions"
-if [ -f ${scriptDir}/_functions/initFunctions ]; then source ${scriptDir}/_functions/initFunctions; fi
-if [ -f ${scriptDir}/wams-alias.rc ]; then source ${scriptDir}/wams-alias.rc; fi
+## wdp-ams-devops
+#scriptDir=~/git/wdp-ams-devops/Scripts
+## This will initialize the cluster abstraction
+#if [ -f ${scriptDir}/wams-bash.rc ]; then source ${scriptDir}/wams-bash.rc; fi
+## This will update your PATH to include Scripts/dirs. This should be placed in wams-bash.rc
+#alias initFunctions="source ${scriptDir}/_functions/initFunctions"
+#if [ -f ${scriptDir}/_functions/initFunctions ]; then source ${scriptDir}/_functions/initFunctions; fi
+#if [ -f ${scriptDir}/wams-alias.rc ]; then source ${scriptDir}/wams-alias.rc; fi
 #
 HISTSIZE=10000
 HISTFILESIZE=20000
+
+export GOPATH=/root/git/go-ws
+export PATH=$PATH:$(go env GOPATH)/bin
+alias kcw="kc -n ibm-wams"
+alias kck="kc -n kube-system"
+alias kc="/usr/local/bin/kubectl-AWS-1.11.5 --kubeconfig /root/.aws_wams-eks-useast1-dev1/config"
+alias kc="/usr/local/bin/kubectl"
+
+# from https://github.com/ahmetb/kubectl-aliases
+[ -f ~/.kubectl_aliases ] && source ~/.kubectl_aliases
+function kubectl() { echo "+ kubectl $@"; command kubectl $@; }
+
+# jumpbox for dash dev 328078 worker nodes
+alias sshjumpbox='ssh -o ServerAliveInterval=300 -p 12357 hrikumar@158.175.64.75'
+
+#kubectx and kubens
+export PATH=~/.kubectx:$PATH
